@@ -38,6 +38,8 @@ public class User implements UserDetails {
 	private String password;
 	
     private Boolean enabled = true;
+    
+    private String company;
 	
 	@ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	private Set<Role> roles = new HashSet<Role>();
@@ -88,6 +90,14 @@ public class User implements UserDetails {
 
 	public void setEnabled(Boolean enabled) {
 		this.enabled = enabled;
+	}
+
+	public String getCompany() {
+		return company;
+	}
+
+	public void setCompany(String company) {
+		this.company = company;
 	}
 
 	public Set<Role> getRoles() {

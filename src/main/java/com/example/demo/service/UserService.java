@@ -18,5 +18,16 @@ public class UserService implements UserDetailsService {
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 		return repository.findByUsername(username);
 	}
+	
+	public UserDetails loadUserByCompanyAndUsername(String company, String username) throws UsernameNotFoundException {
+		UserDetails user = repository.findByCompanyAndUsername(company, username);
+		
+		if (user == null) {
+			throw new UsernameNotFoundException(username);
+		}
+		
+		return user;
+		
+	}
 
 }

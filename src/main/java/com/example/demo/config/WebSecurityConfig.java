@@ -10,13 +10,17 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
+
+import com.example.demo.security.CompanyUsernamePasswordAuthenticationFilter;
+import com.example.demo.security.CustomUserDetailsAuthenticationProvider;
 
 @Configuration
 @EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	
     @Autowired
-    private UserDetailsService userDetailsService;
+    private CustomUserDetailsAuthenticationProvider authProvider;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -34,6 +38,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 ).permitAll()
                 .anyRequest().authenticated()
                 .and()
+                .addFilterBefore(authenticationFilter(), CompanyUsernamePasswordAuthenticationFilter.class)
             .formLogin()
                 .loginPage("/login")
                 .permitAll()
@@ -44,11 +49,25 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
     public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(userDetailsService).passwordEncoder(bCryptPasswordEncoder());
+    	auth.authenticationProvider(authProvider);
     }
     
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+    
+    @Bean
+    public SimpleUrlAuthenticationFailureHandler failureHandler() {
+    	SimpleUrlAuthenticationFailureHandler handler = new SimpleUrlAuthenticationFailureHandler("/login?error");
+    	return handler;
+	}
+    
+    @Bean
+    public CompanyUsernamePasswordAuthenticationFilter authenticationFilter() throws Exception {
+    	CompanyUsernamePasswordAuthenticationFilter filter = new CompanyUsernamePasswordAuthenticationFilter();
+    	filter.setAuthenticationManager(authenticationManagerBean());
+    	filter.setAuthenticationFailureHandler(failureHandler());
+    	return filter;
     }
 }
